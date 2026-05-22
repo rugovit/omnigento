@@ -1,226 +1,155 @@
 # Omnigento
 
-Omnigento migrates and maintains AI coding-agent instructions.
+Omnigento is a setup kit for keeping AI coding-agent instructions consistent across tools.
 
-Drop it into a repo, tell a filesystem-capable agent to run the setup, and it turns scattered provider files into one canonical instruction system. After that, it keeps GitHub Copilot, Cursor, Claude Code, Codex, and `AGENTS.md` views in sync.
+If your project already has instruction files for Cursor, Claude, Copilot, Codex, `AGENTS.md`, or older agent tools, Omnigento helps an AI agent migrate them into one canonical instruction system and keep every provider view in sync after that.
 
-The important part is not just generation. Omnigento can look at the instruction files you already have, classify the useful rules, merge duplicates, propose canonical files, and regenerate the provider-specific outputs.
+The user workflow is intentionally simple:
 
-## Why This Exists
+```text
+Read and follow omnigento/docs/setup.md.
+```
 
-Most projects do not start clean.
+You give that instruction to a filesystem-capable coding agent. The agent reads the project, runs the Omnigento scripts, migrates or creates the canonical instruction files, regenerates the provider-specific files, and verifies consistency.
 
-They already have some mix of:
+You review the diff. You do not manually copy rules between five different AI tools.
 
-- `.github/copilot-instructions.md`
-- `.cursor/rules/*.mdc`
-- `CLAUDE.md`
-- `.claude/rules/*.md`
-- `.claude/skills/*/SKILL.md`
-- `AGENTS.md`
-- old `.cursorrules`, `GEMINI.md`, `.windsurfrules`, `.clinerules`, `.roo/rules/**`, or `.cody/**`
+## What Problem It Solves
 
-Those files drift. One rule gets copied five times, then edited in two places, then contradicted by a third. After a few weeks, nobody knows which instruction the agent is actually supposed to trust.
+AI coding tools all want their own instruction format:
 
-Omnigento gives the project one source of truth:
+- GitHub Copilot uses `.github/copilot-instructions.md`
+- Cursor uses `.cursor/rules/*.mdc`
+- Claude Code uses `CLAUDE.md`, `.claude/rules/*.md`, and `.claude/skills/*/SKILL.md`
+- Codex and other tools read `AGENTS.md`
+- Older setups may have `.cursorrules`, `GEMINI.md`, `.windsurfrules`, `.clinerules`, `.roo/rules/**`, or `.cody/**`
+
+Without a system, the same project rule gets copied everywhere. Then one copy changes, another does not, and your agents start receiving contradictory instructions.
+
+Omnigento fixes that by making `.github/instructions/` the canonical source of truth.
 
 ```text
 .github/instructions/*.instructions.md        canonical project rules
 .github/instructions/skills/*.instructions.md canonical on-request workflows
 ```
 
-Everything else becomes generated output:
+Everything else becomes generated:
 
 ```text
-AGENTS.md                                    generated
-CLAUDE.md                                    generated
-.cursor/rules/*.mdc                          generated
-.claude/rules/*.md                           generated
-.claude/skills/*/SKILL.md                    generated
+AGENTS.md
+CLAUDE.md
+.github/copilot-instructions.md
+.cursor/rules/*.mdc
+.claude/rules/*.md
+.claude/skills/*/SKILL.md
 ```
 
-Canonical files own the truth. Provider files become disposable views.
+The provider files are no longer hand-maintained. They are regenerated from the canonical `.github/instructions/` folder.
 
-## The Fire-and-Forget Setup
+## What Happens When You Use It
 
-For an existing repo, the intended workflow is simple:
+For an existing project, Omnigento helps your AI agent:
+
+1. Find existing AI instruction files.
+2. Decide whether the project needs a fresh setup, a migration, or a repair.
+3. Extract useful project rules from old provider-specific files.
+4. Remove provider boilerplate and stale source-of-truth claims.
+5. Create or update canonical `.github/instructions/*.instructions.md` files.
+6. Add the Omnigento instruction rules that teach future agents how to maintain the system.
+7. Regenerate Copilot, Cursor, Claude, Codex, and `AGENTS.md` views from the canonical files.
+8. Run checks so generated files cannot silently drift.
+
+That is the main value: Omnigento does the messy migration and leaves behind a maintainable instruction system.
+
+## After Setup
+
+After Omnigento is installed, future instruction changes should happen in `.github/instructions/`.
+
+You can still use an AI agent for this. Tell it what behavior you want added or changed, and it should update the canonical instruction files first. Then it runs Omnigento's sync script to regenerate every provider view from the canonical source.
+
+That means the human workflow is:
+
+```text
+"Add instructions for how this repo handles deployments."
+```
+
+The agent workflow is:
+
+```text
+edit .github/instructions/...
+run ./omnigento/bin/sync_ai_instructions.py --write
+run ./omnigento/bin/sync_ai_instructions.py --check
+```
+
+The important part for the user is that consistency is maintained automatically by the generated provider views. You do not need to remember how Cursor, Claude, Copilot, and `AGENTS.md` each want the same rule formatted.
+
+## Install
+
+Add Omnigento to your project:
 
 ```bash
 git submodule add https://github.com/rugovitGejming/omnigento.git omnigento
 ```
 
-Then tell your coding agent:
+Then ask your coding agent:
 
 ```text
 Read and follow omnigento/docs/setup.md.
 ```
 
-The setup workflow tells the agent to:
+The setup file is the migration playbook. It tells the agent when to bootstrap, when to normalize existing instructions, and when to repair generated drift.
 
-1. Plant Omnigento's baseline files.
-2. Detect whether the repo is new, already normalized, or full of legacy provider instructions.
-3. Inventory existing AI instruction surfaces.
-4. Normalize useful existing rules into `.github/instructions/`.
-5. Preserve project-specific facts and discard provider boilerplate.
-6. Regenerate Copilot, Cursor, Claude, Codex, and Agent Markdown views.
-7. Run drift checks and integrity audits.
+## What Omnigento Adds To Your Project
 
-You still review the diff before committing. But you do not have to manually copy rules between provider files.
-
-## What It Does
-
-- Migrates existing provider-specific instruction files into a canonical schema.
-- Generates provider-specific instruction files from `.github/instructions/`.
-- Keeps file-scoped rules aligned across Cursor globs, Claude paths, and nested `AGENTS.md`.
-- Supports topic-based discovery without pretending it is deterministic auto-loading.
-- Supports on-request skills for repeatable agent workflows.
-- Detects drift with `--check`.
-- Audits orphan generated files, stale provider pointers, frontmatter drift, dangling links, and scaffold residue.
-- Provides a staged normalizer for migrating existing Claude, Cursor, Copilot, Agent Markdown, Gemini, Windsurf, Cline, Roo, or Cody instructions into the canonical schema.
-
-## Manual Quick Start
-
-Add Omnigento to a project as an `omnigento/` directory:
-
-```bash
-git submodule add https://github.com/rugovitGejming/omnigento.git omnigento
-```
-
-Then from the target project root:
-
-```bash
-./omnigento/bin/plant.py
-./omnigento/bin/sync_ai_instructions.py --audit
-```
-
-If the audit shows existing instruction files that need normalization, use the setup workflow instead of guessing:
+Omnigento plants and maintains a canonical instruction structure:
 
 ```text
-Read and follow omnigento/docs/setup.md.
+.github/instructions/
+  ai-behavior.instructions.md
+  documentation-rules.instructions.md
+  instruction-style.instructions.md
+  omnigento.instructions.md
+  ...
+  skills/
+    <workflow>.instructions.md
 ```
 
-That file is the migration playbook.
+The `omnigento.instructions.md` and `instruction-style.instructions.md` files are especially important. They teach future agents that:
 
-## Daily Workflow
+- canonical instructions live in `.github/instructions/`
+- generated provider files should not be edited by hand
+- new instructions should be added to the canonical layer first
+- provider views should be regenerated from canonical files
+- drift checks should be run before finishing
 
-After editing canonical instruction files:
+This is what makes the setup durable instead of a one-time migration.
 
-```bash
-./omnigento/bin/sync_ai_instructions.py --write
-./omnigento/bin/sync_ai_instructions.py --check
-```
+## For Maintainers
 
-Preview generated changes without writing:
+Most users should interact with Omnigento through their AI agent. The scripts exist so the agent has deterministic tools instead of improvising.
 
-```bash
-./omnigento/bin/sync_ai_instructions.py --diff
-```
+Core scripts:
 
-Run the integrity audit:
-
-```bash
-./omnigento/bin/sync_ai_instructions.py --audit
-```
-
-## Canonical Instruction Format
-
-Topic-based rule:
-
-```md
----
-description: "Deployment policy and release safety rules."
----
-
-# Deployment Policy
-
-- Production deploys require explicit human approval.
-- Run the test deploy script before production changes.
-```
-
-File-scoped rule:
-
-```md
----
-description: "Python service conventions."
-applyTo: "services/**/*.py"
----
-
-# Python Service Conventions
-
-- Keep service startup side-effect free.
-- Prefer explicit environment validation at process startup.
-```
-
-On-request skill:
-
-```text
-.github/instructions/skills/<skill>.instructions.md
-```
-
-Skills use `description` frontmatter and no `applyTo`.
-
-## Commands
-
-| Command | Purpose |
+| Script | What it is for |
 |---|---|
-| `bin/plant.py` | Plant Omnigento canonical templates and missing provider entry points. |
-| `bin/sync_ai_instructions.py --write` | Generate provider views from canonical instructions. |
-| `bin/sync_ai_instructions.py --check` | Fail when generated views drift from canonical output. |
-| `bin/sync_ai_instructions.py --diff` | Print the generated diff without writing. |
-| `bin/sync_ai_instructions.py --audit` | Check structural integrity of generated instruction surfaces. |
-| `bin/normalize_legacy_instructions.py` | Inventory, classify, merge, propose, and apply normalized canonical instructions from legacy provider files. |
-
-## Legacy Normalization
-
-For projects that already have scattered AI instruction files, Omnigento uses a staged pipeline:
-
-```text
-inventory -> classify -> merge -> propose -> apply -> sync
-```
-
-Example:
-
-```bash
-RUN_ID="migrate-$(date -u +%Y%m%d-%H%M%SZ)"
-
-./omnigento/bin/normalize_legacy_instructions.py --inventory --run-id "$RUN_ID"
-./omnigento/bin/normalize_legacy_instructions.py --classify --run-id "$RUN_ID" --runtime mock
-./omnigento/bin/normalize_legacy_instructions.py --merge --run-id "$RUN_ID"
-./omnigento/bin/normalize_legacy_instructions.py --propose --run-id "$RUN_ID"
-```
-
-The classifier boundary is explicit so teams can wire in their own model/runtime policy.
-
-## Design Principles
-
-- Canonical instructions beat provider boilerplate.
-- Generated files should be marked and disposable.
-- File-scoped rules should be deterministic where providers support path metadata.
-- Topic-based rules should be discoverable, not oversold as guaranteed context.
-- Runtime configuration, MCP setup, editor settings, and secrets are outside the instruction compiler.
-
-## Repository Layout
-
-```text
-bin/      command-line tools
-docs/     setup workflow and detailed reference docs
-lib/      normalizer library and instruction surface registry
-meta/     version metadata
-tests/    zero-dependency regression suite
-```
+| `bin/plant.py` | Adds Omnigento baseline files and missing provider entry points. |
+| `bin/normalize_legacy_instructions.py` | Inventories and migrates existing provider-specific instruction files into canonical files. |
+| `bin/sync_ai_instructions.py --write` | Regenerates provider files from `.github/instructions/`. |
+| `bin/sync_ai_instructions.py --check` | Fails if generated provider files drift from canonical output. |
+| `bin/sync_ai_instructions.py --audit` | Finds broken generated surfaces, orphan rules, dangling links, and scaffold residue. |
 
 ## Verification
 
-Run:
+Omnigento has a zero-dependency regression suite:
 
 ```bash
 python3 tests/run_normalizer_regression.py
 ```
 
-The test suite uses temporary projects and does not modify real project instruction files.
+The tests use temporary projects and do not modify real project instruction files.
 
 ## Status
 
-Omnigento is intentionally small and file-based. It is suitable for teams that want their AI agent instructions to be explicit, reviewable, and reproducible across providers without adding a service dependency.
+Omnigento is intentionally file-based. It does not require a service, database, editor plugin, or hosted account. It is meant to make AI instruction systems reviewable, portable, and consistent across tools.
 
-See [docs/README.md](docs/README.md) for the full reference.
+See [docs/README.md](docs/README.md) for the detailed technical reference.
