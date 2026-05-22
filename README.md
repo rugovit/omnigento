@@ -2,7 +2,11 @@
 
 Omnigento is a setup kit for keeping AI coding-agent instructions consistent across tools.
 
-If your project already has instruction files for Cursor, Claude, Copilot, Codex, `AGENTS.md`, or older agent tools, Omnigento helps an AI agent migrate them into one canonical instruction system and keep every provider view in sync after that.
+For a new project, Omnigento helps an AI agent create a clean instruction system from the start.
+
+For an existing project, Omnigento helps an AI agent migrate scattered Cursor, Claude, Copilot, Codex, `AGENTS.md`, or older agent-tool instructions into one canonical instruction system.
+
+In both cases, it keeps every provider view in sync after setup.
 
 The user workflow is intentionally simple:
 
@@ -10,7 +14,7 @@ The user workflow is intentionally simple:
 Read and follow omnigento/docs/setup.md.
 ```
 
-You give that instruction to a filesystem-capable coding agent. The agent reads the project, runs the Omnigento scripts, migrates or creates the canonical instruction files, regenerates the provider-specific files, and verifies consistency.
+You give that instruction to a filesystem-capable coding agent. The agent reads the project, runs the Omnigento scripts, creates or migrates the canonical instruction files, regenerates the provider-specific files, and verifies consistency.
 
 You review the diff. You do not manually copy rules between five different AI tools.
 
@@ -24,7 +28,14 @@ AI coding tools all want their own instruction format:
 - Codex and other tools read `AGENTS.md`
 - Older setups may have `.cursorrules`, `GEMINI.md`, `.windsurfrules`, `.clinerules`, `.roo/rules/**`, or `.cody/**`
 
+New projects need clear rules before agents start improvising. Existing projects often already have rules scattered across provider-specific files.
+
 Without a system, the same project rule gets copied everywhere. Then one copy changes, another does not, and your agents start receiving contradictory instructions.
+
+Omnigento handles both cases:
+
+- **New project:** create a canonical instruction structure and generate provider views from day one.
+- **Existing project:** migrate useful rules out of old provider files, normalize them, and regenerate clean provider views.
 
 Omnigento fixes that by making `.github/instructions/` the canonical source of truth.
 
@@ -48,24 +59,25 @@ The provider files are no longer hand-maintained. They are regenerated from the 
 
 ## What Happens When You Use It
 
-For an existing project, Omnigento helps your AI agent:
+Omnigento helps your AI agent:
 
 1. Find existing AI instruction files.
 2. Decide whether the project needs a fresh setup, a migration, or a repair.
-3. Extract useful project rules from old provider-specific files.
-4. Remove provider boilerplate and stale source-of-truth claims.
-5. Create or update canonical `.github/instructions/*.instructions.md` files.
-6. Add the Omnigento instruction rules that teach future agents how to maintain the system.
-7. Regenerate Copilot, Cursor, Claude, Codex, and `AGENTS.md` views from the canonical files.
-8. Run checks so generated files cannot silently drift.
+3. For a new project, create the initial canonical instruction structure.
+4. For an existing project, extract useful project rules from old provider-specific files.
+5. Remove provider boilerplate and stale source-of-truth claims.
+6. Create or update canonical `.github/instructions/*.instructions.md` files.
+7. Add the Omnigento instruction rules that teach future agents how to maintain the system.
+8. Regenerate Copilot, Cursor, Claude, Codex, and `AGENTS.md` views from the canonical files.
+9. Run checks so generated files cannot silently drift.
 
-That is the main value: Omnigento does the messy migration and leaves behind a maintainable instruction system.
+That is the main value: Omnigento gives new projects a clean instruction system and gives existing projects a path out of provider-file sprawl.
 
 ## After Setup
 
 After Omnigento is installed, future instruction changes should happen in `.github/instructions/`.
 
-You can still use an AI agent for this. Tell it what behavior you want added or changed, and it should update the canonical instruction files first. Then it runs Omnigento's sync script to regenerate every provider view from the canonical source.
+Omnigento also adds instructions for future instruction maintenance. That means when you later ask an AI agent to add or change project instructions, the agent should know to update the canonical `.github/instructions/` files first and then run the Omnigento sync script so every provider view is regenerated.
 
 That means the human workflow is:
 
@@ -81,7 +93,14 @@ run ./omnigento/bin/sync_ai_instructions.py --write
 run ./omnigento/bin/sync_ai_instructions.py --check
 ```
 
-The important part for the user is that consistency is maintained automatically by the generated provider views. You do not need to remember how Cursor, Claude, Copilot, and `AGENTS.md` each want the same rule formatted.
+If you edit instruction files manually, you need to run the sync yourself:
+
+```bash
+./omnigento/bin/sync_ai_instructions.py --write
+./omnigento/bin/sync_ai_instructions.py --check
+```
+
+The important part for the user is that AI-assisted instruction changes can stay consistent automatically because Omnigento plants the maintenance rules and provides the sync script. You do not need to remember how Cursor, Claude, Copilot, and `AGENTS.md` each want the same rule formatted.
 
 ## Install
 
@@ -97,7 +116,7 @@ Then ask your coding agent:
 Read and follow omnigento/docs/setup.md.
 ```
 
-The setup file is the migration playbook. It tells the agent when to bootstrap, when to normalize existing instructions, and when to repair generated drift.
+The setup file is the playbook. It tells the agent when to bootstrap a new project, when to normalize existing instructions, and when to repair generated drift.
 
 ## What Omnigento Adds To Your Project
 
@@ -121,6 +140,7 @@ The `omnigento.instructions.md` and `instruction-style.instructions.md` files ar
 - new instructions should be added to the canonical layer first
 - provider views should be regenerated from canonical files
 - drift checks should be run before finishing
+- manual instruction edits require manually running the sync/check commands
 
 This is what makes the setup durable instead of a one-time migration.
 
