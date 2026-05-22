@@ -199,6 +199,18 @@ For manual terminal use, start with:
 
 `plant.py` only plants Omnigento files and missing scaffolds; it does not run an AI migration by itself. After planting, continue with `omnigento/docs/setup.md`.
 
+## Custom Instructions
+
+Omnigento core is limited to instruction-system maintenance. Personal or company preferences belong in:
+
+```text
+omnigento/custom-instructions/
+```
+
+When this directory exists, setup applies every `*.instructions.md` template in it after adapting any `<ADAPT:...>` placeholders to the target project.
+
+Use this for reusable preferences such as AI interaction style, strict documentation rules, review posture, testing habits, or deployment rituals. These templates are useful across projects, but they are not universal Omnigento defaults.
+
 ## Legacy Normalization CLI
 
 `bin/normalize_legacy_instructions.py` is the staged migration pipeline for projects that already have AI instructions from one or more providers. It does not replace the sync compiler. Its job is to turn legacy provider files into proposed canonical `.github/instructions/**/*.instructions.md` files.

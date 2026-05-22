@@ -85,7 +85,7 @@ applyTo: "glob/pattern/**"   # optional; omit for topic-based or on-request
 
 **Provider boilerplate is discarded.** Do not copy redirect text, "source of truth" claims, or duplicated provider wrappers into canonical topics.
 
-**Resolve overlap with Omnigento wording.** If an existing rule duplicates a universal Omnigento rule, keep the Omnigento version and add only project-specific detail.
+**Resolve overlap with Omnigento wording.** If an existing rule duplicates a core Omnigento rule, keep the Omnigento version and add only project-specific detail. If it conflicts with a custom instruction, preserve the explicit project rule and report the custom conflict.
 
 **Report real conflicts.** Do not silently blend contradictory commands, environments, or safety rules.
 

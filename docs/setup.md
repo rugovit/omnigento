@@ -33,9 +33,10 @@ Use this path for projects with no meaningful existing AI instructions.
 
 1. Inspect the project structure, languages, frameworks, build/test commands, deployment flow, docs, services, config files, and safety constraints.
 2. Create or update canonical topics in `.github/instructions/`.
-3. Include the universal Omnigento topics when missing: `ai-behavior`, `documentation-rules`, `instruction-style`, and `omnigento`.
-4. Use `applyTo` only for real file or directory scopes. Put broad operational context in topic-based instructions.
-5. Keep project-specific facts concrete: commands, paths, ports, environment files, services, release flow, and local gotchas.
+3. Include the core Omnigento topics when missing: `instruction-style` and `omnigento`.
+4. If `omnigento/custom-instructions/` exists, apply every `*.instructions.md` template under it after adapting any `<ADAPT:...>` placeholders to this project.
+5. Use `applyTo` only for real file or directory scopes. Put broad operational context in topic-based instructions.
+6. Keep project-specific facts concrete: commands, paths, ports, environment files, services, release flow, and local gotchas.
 
 ## Normalize
 
@@ -61,8 +62,9 @@ RUN_ID="migrate-$(date -u +%Y%m%d-%H%M%SZ)"
 
 3. If no classifier adapter exists, manually inspect `inventory.json` and migrate durable rules into canonical `.github/instructions/**/*.instructions.md` files.
 4. Preserve safety rules, commands, paths, ports, services, deployment flows, naming conventions, and local gotchas.
-5. Discard provider boilerplate, duplicate redirects, generic AI advice already covered by universal topics, and obsolete source-of-truth claims.
-6. If staged proposals were generated, review `merge/migration-table.md`, `proposed/`, and `proposed/unsupported-rules.json` before applying:
+5. If `omnigento/custom-instructions/` exists, apply every `*.instructions.md` template under it after adapting any `<ADAPT:...>` placeholders to this project.
+6. Discard provider boilerplate, duplicate redirects, generic AI advice already covered by core or custom topics, and obsolete source-of-truth claims.
+7. If staged proposals were generated, review `merge/migration-table.md`, `proposed/`, and `proposed/unsupported-rules.json` before applying:
 
 ```bash
 ./omnigento/bin/normalize_legacy_instructions.py --apply --run-id "$RUN_ID"

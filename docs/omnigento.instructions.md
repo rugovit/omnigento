@@ -217,57 +217,26 @@ The schema is healthy when **all** of the following hold. Bootstrap (S4), Normal
 
 ---
 
-## S2 Universal Topics
+## S2 Core And Custom Topics
 
-**During bootstrap or normalization, extract each subsection below into its own `.github/instructions/` file when missing or outdated.** Use the subsection heading as the filename. The yaml block is the file frontmatter; the content below it is the body.
+**Core Omnigento topics are limited to instruction-system maintenance.** Core topics tell future agents where canonical instructions live, how provider views are generated, and how to keep the instruction system consistent. They must not impose project-specific coding, documentation, communication, testing, or deployment preferences.
 
-### ai-behavior.instructions.md
+**Always keep these core topics:**
 
-```yaml
----
-description: "AI conversation rules: ask before creating, verify before suggesting, be concise. Use when the AI needs guidance on interaction style, file creation limits, or what NOT to do."
----
-```
+- `omnigento.instructions.md`
+- `instruction-style.instructions.md`
 
-**ASK FIRST, CODE LATER** - Have a conversation before creating anything. Verify what exists. Confirm priorities.
+**Optional custom instructions are user-owned.** If `omnigento/custom-instructions/` exists, treat every `*.instructions.md` file under it as an opt-in reusable instruction template. During bootstrap or normalization, copy or adapt those templates into `.github/instructions/` before generating provider views.
 
-**DO NOT create files without explicit request.** No unprompted guides, plans, analysis docs. Maximum 1-2 files per response unless asked for more.
+Custom instructions are where users can keep personal or company preferences such as AI interaction style, strict documentation rules, review posture, testing habits, or deployment rituals. These are useful, but they are not universal Omnigento defaults.
 
-**VERIFY before suggesting.** Read actual config files. Check if settings exist. Never hallucinate options. If uncertain: "Let me check the config first."
+**Custom instruction rules:**
 
-**BE CONCISE.** Targeted answers, not encyclopedic responses. Offer 2-3 options, not 6-phase plans. Brief explanations unless user asks for detail.
-
-**BE COLLABORATIVE.** Suggest options and ask preference. Do not assume priorities. Work with the user.
-
-Going Crazy (DO NOT DO THIS): creating 9+ files in one response, writing 200-line guides unprompted, hallucinating config options, building entire solutions without discussing requirements.
-
-Good Behavior: "Want me to fix it or create a detailed analysis?" / "Let me check the actual config first." / "Quick fix or proper solution?" / "Summary doc, or just discuss?"
-
-### documentation-rules.instructions.md
-
-```yaml
----
-description: "Documentation standards: required sections, writing style, every code file needs matching docs. Use when creating or editing documentation."
-applyTo: "<ADAPT: set glob for project's code directories, e.g. src/**/*.py,scripts/**/*.sh>"
----
-```
-
-**Document what AI cannot infer from code.** AI reads code instantly - it does not need function descriptions. What it needs is the intent, failed attempts, and gotchas that shaped the solution.
-
-**Every code file MUST have a matching `.md` file.** Same name, same directory. Every code edit MUST update its `.md` file.
-
-| Section | What goes in it | Required? |
-|---------|----------------|-----------|
-| **Problem & Intent** | What problem this solves, why it was built | Always |
-| **Approach & Why** | Brief how-it-works + why this design over alternatives | Always |
-| **What Didn't Work** | Rejected approaches, failed attempts, dead ends | Complex modules |
-| **Dependencies** | Other files, services, configs, external tools needed | Always |
-| **Usage** | Commands, options, examples | Always |
-| **Gotchas** | Production lessons, non-obvious edge cases | When applicable |
-
-**Writing style:** Follow `instruction-style.instructions.md`. Delete any sentence that restates what the code says.
-
-**AI workflow:** Read `.md` before editing code. Update `.md` after editing code.
+- Preserve the filename when copying into `.github/instructions/`.
+- Preserve frontmatter unless it contains `<ADAPT:...>` placeholders.
+- Adapt `<ADAPT:...>` placeholders to real project paths or omit the file and report why.
+- Do not apply a custom instruction if it conflicts with explicit project rules.
+- Report every custom instruction applied, skipped, or adapted.
 
 ---
 
@@ -295,7 +264,8 @@ Scan the project: languages, frameworks, build tools, directory structure, exist
 
 Present a topic table to the user:
 
-- **Universal topics:** `ai-behavior`, `documentation-rules`, `instruction-style`, `omnigento`
+- **Core topics:** `instruction-style`, `omnigento`
+- **Custom topics:** any `*.instructions.md` files under `omnigento/custom-instructions/`, if the folder exists
 - **Discovered topics:** 3-8 project-specific topics based on discovery
 - **For each topic:** filename, one-line description, file-scoped vs topic-based, glob pattern if file-scoped, source evidence
 
@@ -310,7 +280,7 @@ For each approved topic:
 1. Create `.github/instructions/<topic>.instructions.md` following `instruction-style`.
 2. Use `applyTo` only for natural file scopes.
 3. Keep durable project rules in `.github/instructions/`, not provider files.
-4. Extract universal topics from S2 and adapt `<ADAPT:...>` markers to the project.
+4. Apply custom instruction templates from `omnigento/custom-instructions/` when present, adapting `<ADAPT:...>` markers to the project.
 
 ### Step 4 - Generate Provider Views
 
@@ -361,7 +331,7 @@ Extract only useful rules and facts:
 Discard:
 
 - **Provider boilerplate:** "read this file", "this provider file is source of truth", duplicate redirects
-- **Generic AI advice:** already covered by universal topics
+- **Generic AI advice:** not a project fact unless it came from explicit project instructions or an opted-in custom instruction
 - **Obsolete layout claims:** anything that conflicts with the Omnigento schema
 - **Duplicated wording:** preserve the strongest rule once, not every copy
 
@@ -389,7 +359,7 @@ Apply this priority order:
 5. **Existing provider wording** is used only when it expresses a project rule better than Omnigento.
 6. **Inferred rules** are weakest and should be proposed, not silently asserted.
 
-**Overlap rule:** If an existing rule overlaps with a universal Omnigento rule, use the Omnigento wording and preserve only project-specific additions.
+**Overlap rule:** If an existing rule overlaps with a core Omnigento rule, use the Omnigento wording and preserve only project-specific additions. If an existing rule overlaps with a custom instruction, preserve the explicit project rule and report the custom conflict.
 
 **Conflict rule:** Resolve obvious conflicts by the priority table; list meaningful unresolved conflicts in the proposal before writing.
 
@@ -487,7 +457,7 @@ Walk the **Integrity Audit Checklist** (end of S1). The same checklist used duri
 | Change | Version bump |
 |--------|--------------|
 | Typo or wording clarification | Patch |
-| New provider support, protocol step, or universal topic improvement | Minor |
+| New provider support, protocol step, or core/custom topic handling improvement | Minor |
 | Breaking schema/location change | Major |
 
 **Authority:** Version helps migration diagnostics; the canonical schema in this file remains the authority.
@@ -496,7 +466,7 @@ Walk the **Integrity Audit Checklist** (end of S1). The same checklist used duri
 
 ## S8 Port Back to Omnigento
 
-When you improve a universal topic or protocol during project work:
+When you improve a core topic, custom-topic handling, or protocol during project work:
 
 1. Update the template text in this file.
 2. Update `instruction-style.instructions.md` if provider sync/style rules changed.

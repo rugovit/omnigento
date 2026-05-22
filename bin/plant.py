@@ -21,14 +21,6 @@ COPILOT_SKELETON = """# Project AI Instructions
 
 > Scaffold: run the Bootstrap Protocol or Normalize Existing Instructions Protocol.
 
-## AI Behavior - READ THIS FIRST
-
-**ASK before creating files. VERIFY before suggesting. Be CONCISE.**
-
--> Full rules: [ai-behavior.instructions.md](.github/instructions/ai-behavior.instructions.md)
-
----
-
 ## Reference Docs
 
 | File | Covers | Auto-loads for |

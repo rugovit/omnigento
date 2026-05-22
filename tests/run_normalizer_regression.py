@@ -762,9 +762,22 @@ def test_setup_entrypoint_ux(base: Path) -> None:
     assert_not_contains(plant, "paste it into your AI assistant", "plant stale paste prompt")
 
 
+def test_core_templates_do_not_force_project_opinions(base: Path) -> None:
+    del base
+    setup = (SOURCE_KIT / "docs" / "setup.md").read_text(encoding="utf-8")
+    omnigento = (SOURCE_KIT / "docs" / "omnigento.instructions.md").read_text(encoding="utf-8")
+    plant = (SOURCE_KIT / "bin" / "plant.py").read_text(encoding="utf-8")
+
+    assert_not_contains(setup, "`ai-behavior`, `documentation-rules`", "setup core topics")
+    assert_not_contains(omnigento, "Every code file MUST have a matching `.md` file.", "core documentation opinion")
+    assert_not_contains(plant, "ai-behavior.instructions.md", "plant skeleton ai behavior link")
+    assert_contains(omnigento, "omnigento/custom-instructions/", "custom instruction support")
+
+
 def main() -> int:
     tests = [
         ("setup_entrypoint_ux", test_setup_entrypoint_ux),
+        ("core_templates_do_not_force_project_opinions", test_core_templates_do_not_force_project_opinions),
         ("normalized_project_noop", test_normalized_project_noop),
         ("legacy_generated_markers_not_legacy_input", test_legacy_generated_markers_not_legacy_input),
         ("legacy_overlap_pipeline", test_legacy_overlap_pipeline),
