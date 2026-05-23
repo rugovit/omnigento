@@ -131,7 +131,7 @@ Omnigento plants and maintains a canonical instruction structure:
     <workflow>.instructions.md
 ```
 
-If `omnigento/custom-instructions/` exists, setup also applies those user-owned templates. That folder is for personal or company preferences that are useful across projects but should not be treated as Omnigento defaults. It is ignored by this repository so your private instruction preferences do not accidentally ship as public defaults.
+If `omnigento/custom-instructions/` exists, setup also applies those user-owned templates. That folder is for personal or company preferences that are useful across projects but should not be treated as Omnigento defaults.
 
 The `omnigento.instructions.md` and `instruction-style.instructions.md` files are especially important. They teach future agents that:
 
