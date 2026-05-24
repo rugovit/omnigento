@@ -127,11 +127,28 @@ The important part for the user is that AI-assisted instruction changes can stay
 
 ## Install
 
-Add Omnigento to your project:
+From the root of your project, clone Omnigento into an `omnigento/` folder:
 
 ```bash
-git submodule add https://github.com/rugovitGejming/omnigento.git omnigento
+git clone <omnigento-repository-url> omnigento
 ```
+
+If your project is already a Git repository, this creates a nested helper repo. That is expected. The parent project should usually ignore the Omnigento tool code:
+
+```gitignore
+/omnigento/**
+```
+
+If you keep reusable custom instruction templates inside `omnigento/custom-instructions/` and want the parent project to track those templates, use a narrow allowlist instead:
+
+```gitignore
+/omnigento/**
+!/omnigento/custom-instructions/
+!/omnigento/custom-instructions/*.instructions.md
+/omnigento/custom-instructions/example.instructions.md
+```
+
+The example placeholder stays ignored by the parent project. Real custom templates can be tracked by the parent when you intentionally want them to travel with that project.
 
 Then ask your coding agent:
 

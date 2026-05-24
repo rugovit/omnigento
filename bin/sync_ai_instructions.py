@@ -28,6 +28,11 @@ CANONICAL_DIR = REPO_ROOT / ".github" / "instructions"
 SKILLS_DIR = CANONICAL_DIR / "skills"
 
 
+def project_title() -> str:
+    name = REPO_ROOT.name.strip() or "Project"
+    return re.sub(r"[-_]+", " ", name).title()
+
+
 @dataclass(frozen=True)
 class Topic:
     stem: str
@@ -352,7 +357,7 @@ def root_agents(topic_based: list[Topic], on_request: list[Topic]) -> str:
     lines = [
         GENERATED_MARKER,
         "",
-        "# Rust Server Project",
+        f"# {project_title()}",
         "",
         "Read and follow `.github/copilot-instructions.md` - it is the provider-neutral hub for all project rules.",
         "",
@@ -376,7 +381,7 @@ def claude_root(topic_based: list[Topic]) -> str:
     lines = [
         GENERATED_MARKER,
         "",
-        "# Rust Server Project",
+        f"# {project_title()}",
         "",
         "Read and follow `.github/copilot-instructions.md` - it is the provider-neutral hub for all project rules.",
         "",
@@ -492,7 +497,7 @@ def generated_outputs(file_scoped: list[Topic], topic_based: list[Topic], on_req
     if copilot.exists():
         existing = copilot.read_text(encoding="utf-8")
     else:
-        existing = "# Rust Server Project - AI Instructions\n\n## Reference Docs\n\n"
+        existing = f"# {project_title()} - AI Instructions\n\n## Reference Docs\n\n"
     all_topics = sorted(file_scoped + topic_based + on_request, key=lambda topic: topic.rel_path)
     outputs[copilot] = update_copilot(existing, all_topics)
     return outputs

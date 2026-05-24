@@ -504,7 +504,7 @@ When you improve a core topic, custom-topic handling, or protocol during project
 
 - Same server name + same transport/command/args/env = match.
 - Same server name + different command, args, env, or transport = drift; report before changing.
-- Keep prod/test variants separate; never merge names like `chronicle` and `chronicle_test`.
+- Keep prod/test variants separate; never merge names like `service` and `service_test`.
 - Preserve SSH args, env vars, paths, server names, and inline credentials exactly unless the user approves a change.
 - Report secrets, inline credentials, SSH targets, and production access clearly.
 
