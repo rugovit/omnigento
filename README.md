@@ -18,6 +18,18 @@ You give that instruction to a filesystem-capable coding agent. The agent reads 
 
 You review the diff. You do not manually copy rules between five different AI tools.
 
+```mermaid
+flowchart TD
+  A["New or existing project"] --> B["Ask an AI agent to follow omnigento/docs/setup.md"]
+  B --> C{"Project state"}
+  C -->|"No useful instructions yet"| D["Bootstrap clean canonical instructions"]
+  C -->|"Scattered provider files exist"| E["Migrate useful rules into canonical instructions"]
+  C -->|"Generated files drifted"| F["Repair generated provider views"]
+  D --> G["Review one diff"]
+  E --> G
+  F --> G
+```
+
 ## What Problem It Solves
 
 AI coding tools all want their own instruction format:
@@ -56,6 +68,17 @@ CLAUDE.md
 ```
 
 The provider files are no longer hand-maintained. They are regenerated from the canonical `.github/instructions/` folder.
+
+```mermaid
+flowchart LR
+  A[".github/instructions/"] --> B["Omnigento sync"]
+  B --> C["AGENTS.md"]
+  B --> D["CLAUDE.md"]
+  B --> E[".github/copilot-instructions.md"]
+  B --> F[".cursor/rules/*.mdc"]
+  B --> G[".claude/rules/*.md"]
+  B --> H[".claude/skills/*/SKILL.md"]
+```
 
 ## What Happens When You Use It
 
@@ -132,6 +155,15 @@ Omnigento plants and maintains a canonical instruction structure:
 ```
 
 If `omnigento/custom-instructions/` exists, setup also applies those user-owned templates. That folder is for personal or company preferences that are useful across projects but should not be treated as Omnigento defaults.
+
+```mermaid
+flowchart TD
+  A["Your reusable preferences"] --> B["omnigento/custom-instructions/*.instructions.md"]
+  B --> C["Setup applies them to a target project"]
+  C --> D[".github/instructions/"]
+  D --> E["Provider files are regenerated"]
+  E --> F["Future AI agents receive the same rules"]
+```
 
 The `omnigento.instructions.md` and `instruction-style.instructions.md` files are especially important. They teach future agents that:
 
